@@ -1,0 +1,3 @@
+GrammarSpecification:
+All classes should be immutable.
+The Symbol equality is based on reference equality.

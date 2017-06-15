@@ -1,0 +1,10 @@
+2
+Expr Term Factor
+( ) * + i
+Expr
+Expr -> Expr + Term
+Expr -> Term
+Term -> Term * Factor
+Term -> Factor
+Factor -> ( Expr )
+Factor -> i
