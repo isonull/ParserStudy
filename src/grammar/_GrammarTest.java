@@ -32,5 +32,16 @@ public class _GrammarTest {
 		ruleList.get(0).println();
 		phrase = phrase.applyRule(ruleList.get(0), 0);
 		phrase.println();
+		phrase = phrase.applyRule(ruleList.get(0), 0);
+		phrase.println();
+		phrase = phrase.applyRule(ruleList.get(2), 2);
+		phrase.println();
+		System.out.println(phrase.containSymbolsInSequence(grammar.getSymbolList("+ + *")));
+		System.out.println(phrase.containSymbolsInSequence(grammar.getSymbolList("+ * +")));
+
+		LinkedList<Phrase> outList = ruleList.getAllOutByIn(grammar.getPhrase("Expr"));
+		for (Phrase phr : outList) {
+			phr.println();
+		}
 	}
 }

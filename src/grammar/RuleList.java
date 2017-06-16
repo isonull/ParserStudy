@@ -8,6 +8,16 @@ public class RuleList extends LinkedList<Rule> {
 		super();
 	}
 
+	public PhraseList getAllOutByIn(Phrase in) {
+		PhraseList outList = new PhraseList();
+		for (Rule rule : this) {
+			if (rule.inEqual(in)) {
+				outList.add(rule.getOut());
+			}
+		}
+		return outList;
+	}
+
 	public void print() {
 		System.out.print(this.toString());
 	}

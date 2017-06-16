@@ -36,6 +36,14 @@ public class Grammar {
 		}
 	}
 
+	public Phrase getPhrase(SymbolList symbolList) {
+		return new Phrase(symbolList);
+	}
+
+	public SymbolList getSymbolList(String str) throws GrammarException {
+		return factory.getSymbolList(str, nonTerminalSymbolList, terminalSymbolList);
+	}
+
 	public boolean containSymbol(Symbol symbol) {
 		return nonTerminalSymbolList.contains(symbol) || terminalSymbolList.contains(symbol);
 	}

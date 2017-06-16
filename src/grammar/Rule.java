@@ -29,6 +29,14 @@ public class Rule {
 		return out;
 	}
 
+	public boolean outEqual(Phrase phrase) {
+		return out.equals(phrase);
+	}
+
+	public boolean inEqual(Phrase phrase) {
+		return in.equals(phrase);
+	}
+
 	public Phrase getIn() {
 		return in;
 	}

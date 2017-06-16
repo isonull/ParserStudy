@@ -3,13 +3,14 @@ package parsar;
 import java.util.LinkedList;
 
 import grammar.Grammar;
+import grammar.GrammarException;
 import grammar.Phrase;
 
 public abstract class Parser {
 	// TODO check whether the parsingMethod is capable for grammar.
 
-	private ParsingMethod parsingMethod;
-	private Grammar grammar;
+	protected ParsingMethod parsingMethod;
+	protected Grammar grammar;
 
 	public Parser(Grammar grammar_, ParsingMethod parsingMethod_) {
 		grammar = grammar_;
@@ -24,7 +25,7 @@ public abstract class Parser {
 		grammar = grammar_;
 	}
 
-	public LinkedList<Phrase> parse(Phrase phrase) {
+	public LinkedList<Phrase> parse(Phrase phrase) throws GrammarException {
 		return parsingMethod.parse(phrase, grammar);
 	}
 }

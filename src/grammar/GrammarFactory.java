@@ -35,6 +35,15 @@ public class GrammarFactory {
 		// The method does not check the consistency of the input reference
 		// SymbolList e.g duplication of name. Also the reference of symbol is
 		// taken from the list.
+
+		return new Phrase(getSymbolList(inputStr, nonTermialSymbolList, terminalSymbolList));
+	}
+
+	protected SymbolList getSymbolList(String inputStr, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)
+			throws GrammarException {
+		// The method does not check the consistency of the input reference
+		// SymbolList e.g duplication of name. Also the reference of symbol is
+		// taken from the list.
 		String[] strSplit = inputStr.split(" ");
 		Symbol tempSymbol = null;
 		SymbolList phrase = new SymbolList();
@@ -48,7 +57,7 @@ public class GrammarFactory {
 						"Symbol name " + s + " in the string cannot be found in the ref SymbolList.");
 			}
 		}
-		return new Phrase(phrase);
+		return phrase;
 	}
 
 	protected Phrase getPhrase(List<Symbol> symbolList, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)

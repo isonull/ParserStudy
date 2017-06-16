@@ -1,5 +1,6 @@
 package grammar;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,6 +25,36 @@ public class SymbolList extends LinkedList<Symbol> {
 		return false;
 	}
 
+	public boolean containSymbolAfterIndex(Symbol symbol, int index) {
+		// index is included
+		for (int i = index; i < this.size(); ++i) {
+			if (this.get(i).equals(symbol)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean containSymbolsInSequence(SymbolList symbolList) {
+		Iterator<Symbol> iterator = symbolList.iterator();
+		Symbol s2;
+		if (iterator.hasNext()) {
+			s2 = iterator.next();
+		} else {
+			return true;
+		}
+		for (Symbol s1 : this) {
+			if (s1.equals(s2)) {
+				if (iterator.hasNext()) {
+					s2 = iterator.next();
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	public Symbol getSymbolByName(String name) {
 		for (Symbol symbol : this) {
 			if (symbol.nameCompareTo(name) == 0) {
@@ -31,6 +62,27 @@ public class SymbolList extends LinkedList<Symbol> {
 			}
 		}
 		return null;
+	}
+
+	public SymbolList getTerminalSymbols() {
+		// With duplication.
+		SymbolList symbolList = new SymbolList();
+		for (Symbol symbol : this) {
+			if (symbol.isTerminal()) {
+				symbolList.add(symbol);
+			}
+		}
+		return symbolList;
+	}
+
+	public SymbolList getNonTerminalSymbols() {
+		SymbolList symbolList = new SymbolList();
+		for (Symbol symbol : this) {
+			if (!symbol.isTerminal()) {
+				symbolList.add(symbol);
+			}
+		}
+		return symbolList;
 	}
 
 	public boolean isAllTerminal() {

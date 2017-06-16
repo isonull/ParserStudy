@@ -27,10 +27,6 @@ public class Phrase {
 		return isTerminal;
 	}
 
-	private SymbolList getSymbolList() {
-		return symbolList;
-	}
-
 	public int length() {
 		return symbolList.size();
 	}
@@ -52,15 +48,34 @@ public class Phrase {
 	public boolean equals(Object o) {
 		if (o instanceof Phrase) {
 			Phrase oPhrase = (Phrase) o;
-			return symbolList.equals(oPhrase.getSymbolList());
+			return symbolList.equals(oPhrase.symbolList);
 		}
 		return false;
+	}
+
+	public boolean containSymbol(Symbol symbol) {
+		return symbolList.contains(symbol);
+	}
+
+	public boolean containSymbolsInSequence(SymbolList symbols) {
+		return symbolList.containSymbolsInSequence(symbols);
 	}
 
 	public Phrase subPhrase(int base, int limit) {
 		// include base, exclude limit.
 		return new Phrase(new SymbolList(symbolList.subList(base, limit)));
+	}
 
+	public Symbol getSymbol(int index) {
+		return symbolList.get(index);
+	}
+
+	public SymbolList getTerminalSymbols() {
+		return symbolList.getTerminalSymbols();
+	}
+
+	public SymbolList getNonTerminalSymbols() {
+		return symbolList.getNonTerminalSymbols();
 	}
 
 	public LinkedList<LinkedList<Phrase>> partition(int part) throws GrammarException {
@@ -88,7 +103,7 @@ public class Phrase {
 		SymbolList result = (SymbolList) symbolList.clone();
 		if (this.subPhrase(position, position + ruleInLength).equals(ruleIn)) {
 			result.remove(position, position + ruleInLength);
-			result.addAll(position, ruleOut.getSymbolList());
+			result.addAll(position, ruleOut.symbolList);
 		}
 		return new Phrase(result);
 	}
