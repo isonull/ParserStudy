@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class RuleList extends LinkedList<Rule> {
 
-	protected RuleList() {
+	public RuleList() {
 		super();
 	}
 
@@ -16,6 +16,16 @@ public class RuleList extends LinkedList<Rule> {
 			}
 		}
 		return outList;
+	}
+
+	public RuleList getAllRuleByIn(Phrase in) {
+		RuleList ruleList = new RuleList();
+		for (Rule rule : this) {
+			if (rule.inEqual(in)) {
+				ruleList.add(rule);
+			}
+		}
+		return ruleList;
 	}
 
 	public void print() {

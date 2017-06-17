@@ -14,6 +14,22 @@ public class _UngersParsingMethodTest {
 				.getGrammar("/Users/zijunyan/Desktop/JAVAWORKDIR/ParserStudy/file/UngerParsingTestGrammar.txt");
 		Phrase phrase = grammar.getPhrase("( i + i ) * i");
 		Parser parser = new ContextFreeLanguageParser(grammar, new UngersParsingMethod());
+
+		// parser.parse(phrase);
+		//
+		// phrase = grammar.getPhrase("( i + i )");
+		// parser.parse(phrase);
+		//
+		// phrase = grammar.getPhrase("( i + i ) + i");
+		// parser.parse(phrase);
+
+		phrase = grammar.getPhrase("( ( i + i ) + ( i + i ) ) * i + i");
 		parser.parse(phrase);
+
+		// phrase = grammar.getPhrase("( Expr ) * i");
+		// parser.parse(phrase);
+		//
+		// phrase = grammar.getPhrase("Factor");
+		// parser.parse(phrase);
 	}
 }

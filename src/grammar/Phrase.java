@@ -78,14 +78,20 @@ public class Phrase {
 		return symbolList.getNonTerminalSymbols();
 	}
 
-	public LinkedList<LinkedList<Phrase>> partition(int part) throws GrammarException {
+	public Phrase concatenate(Phrase phrase2) {
+		SymbolList newSymbolList = (SymbolList) symbolList.clone();
+		newSymbolList.addAll(phrase2.symbolList);
+		return new Phrase(newSymbolList);
+	}
+
+	public LinkedList<PhraseList> partition(int part) throws GrammarException {
 		ListMethod<Symbol> listMethod = new ListMethod<Symbol>();
 		LinkedList<LinkedList<List<Symbol>>> symbolListListList = listMethod.partition(symbolList, part);
 
-		LinkedList<LinkedList<Phrase>> castedSymbolListListList = new LinkedList<LinkedList<Phrase>>();
-		LinkedList<Phrase> castedTempSymbolListList;
+		LinkedList<PhraseList> castedSymbolListListList = new LinkedList<PhraseList>();
+		PhraseList castedTempSymbolListList;
 		for (LinkedList<List<Symbol>> symbolListList : symbolListListList) {
-			castedTempSymbolListList = new LinkedList<Phrase>();
+			castedTempSymbolListList = new PhraseList();
 			for (List<Symbol> symbolList : symbolListList) {
 				castedTempSymbolListList.add(new Phrase(new SymbolList(symbolList)));
 			}
@@ -95,17 +101,44 @@ public class Phrase {
 	}
 
 	// TODO: This method now just supports context-free grammar.
-	public Phrase applyRule(Rule rule, int position) {
-		assert (rule.getIn().length() == 1);
+	public Phrase applyRule(Rule rule, int position) throws GrammarException {
+		// assert (rule.getIn().length() == 1);
 		Phrase ruleIn = rule.getIn();
 		Phrase ruleOut = rule.getOut();
 		int ruleInLength = ruleIn.length();
+		if (!this.subPhrase(position, position + ruleInLength).equals(ruleIn)) {
+			throw new GrammarException("the subphrase at the position dose not arree with the rule");
+		}
 		SymbolList result = (SymbolList) symbolList.clone();
 		if (this.subPhrase(position, position + ruleInLength).equals(ruleIn)) {
 			result.remove(position, position + ruleInLength);
 			result.addAll(position, ruleOut.symbolList);
 		}
 		return new Phrase(result);
+	}
+
+	public int getFirstNonTerminalIndex() {
+		if (this.isTerminal) {
+			return -1;
+		}
+		for (int i = 0; i < this.length(); ++i) {
+			if (!symbolList.get(i).isTerminal()) {
+				return i;
+			}
+		}
+		return -1; // this never happens;
+	}
+
+	public int getLastNonTerminalIndex() {
+		if (this.isTerminal) {
+			return -1;
+		}
+		for (int i = this.length() - 1; i > -1; --i) {
+			if (!symbolList.get(i).isTerminal()) {
+				return i;
+			}
+		}
+		return -1; // this never happens;
 	}
 
 }

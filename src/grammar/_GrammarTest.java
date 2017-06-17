@@ -18,7 +18,7 @@ public class _GrammarTest {
 
 		System.out.println(grammar.toString());
 
-		LinkedList<LinkedList<Phrase>> phrasePartition = phrase.partition(3);
+		LinkedList<PhraseList> phrasePartition = phrase.partition(3);
 
 		for (LinkedList<Phrase> phraseList : phrasePartition) {
 			for (Phrase phrase1 : phraseList) {
