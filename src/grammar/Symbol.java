@@ -5,8 +5,11 @@ public class Symbol {
 	private final boolean isTerminal;
 	private final String name;
 
-	protected Symbol(String symbol_, boolean isTerminal_) {
-		name = symbol_;
+	protected Symbol(String name_, boolean isTerminal_) throws GrammarException {
+		if (name_.compareTo("") == 0) {
+			throw new GrammarException("The name of a symbol cannot be empty string");
+		}
+		name = name_;
 		isTerminal = isTerminal_;
 	}
 

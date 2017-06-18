@@ -7,21 +7,40 @@ public class Grammar {
 	// TODO other states to describe behaviours of the Grammar
 	private final byte languageType;
 	// private final boolean containEmptyRule;
+	private final boolean containEmptyRule;
+	private final boolean isMonotonic;
 
 	private final SymbolList nonTerminalSymbolList;
 	private final SymbolList terminalSymbolList;
 	private final Symbol startSymbol;
+	private final Symbol emptySymbol;
 	private final RuleList ruleList;
 	private final GrammarFactory factory;
 
 	protected Grammar(byte languageType_, SymbolList nonTerminalSymbolList_, SymbolList terminalSymbolList_,
-			Symbol startSymbol_, RuleList ruleList_, GrammarFactory factory_) {
+			Symbol startSymbol_, Symbol emptySymbol_, RuleList ruleList_, boolean isMonotonic_,
+			boolean containEmptyRule_, GrammarFactory factory_) {
 		languageType = languageType_;
 		nonTerminalSymbolList = nonTerminalSymbolList_;
 		terminalSymbolList = terminalSymbolList_;
 		startSymbol = startSymbol_;
+		emptySymbol = emptySymbol_;
 		ruleList = ruleList_;
+		isMonotonic = isMonotonic_;
+		containEmptyRule = containEmptyRule_;
 		factory = factory_;
+	}
+
+	public boolean containEmptyRule() {
+		return containEmptyRule;
+	}
+
+	public Symbol getEmptySymbol() {
+		return emptySymbol;
+	}
+
+	public boolean isMonotonic() {
+		return isMonotonic;
 	}
 
 	public Phrase getPhrase(String str) throws GrammarException {

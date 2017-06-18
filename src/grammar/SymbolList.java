@@ -94,6 +94,16 @@ public class SymbolList extends LinkedList<Symbol> {
 		return true;
 	}
 
+	public int containNumberOfSymbol(Symbol symbol) {
+		int i = 0;
+		for (Symbol s : this) {
+			if (s.equals(symbol)) {
+				++i;
+			}
+		}
+		return i;
+	}
+
 	public void print() {
 		System.out.print(this.toString());
 	}

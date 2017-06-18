@@ -1,6 +1,8 @@
 2
+ε
+\|
 Expr Term Factor
-( ) * + i
+( ) * + i ε
 Expr
 Expr -> Expr + Term
 Expr -> Term
