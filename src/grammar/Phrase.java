@@ -107,7 +107,7 @@ public class Phrase {
 		Phrase ruleOut = rule.getOut();
 		int ruleInLength = ruleIn.length();
 		if (!this.subPhrase(position, position + ruleInLength).equals(ruleIn)) {
-			throw new GrammarException("the subphrase at the position dose not arree with the rule");
+			throw new GrammarException("the subphrase at the position does not arree with the rule");
 		}
 		SymbolList result = (SymbolList) symbolList.clone();
 		if (this.subPhrase(position, position + ruleInLength).equals(ruleIn)) {

@@ -12,6 +12,8 @@ public class GrammarFactory {
 	// TODO The validity check should be done.
 	// TODO Singleton pattern for symbol to avoid name duplication.
 
+	private String splitStr;
+
 	protected SymbolList getTerminalSymbolList(String str) {
 		String[] strSplit = str.split(" ");
 		SymbolList symbolList = new SymbolList();

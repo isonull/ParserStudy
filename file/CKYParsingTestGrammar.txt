@@ -1,0 +1,13 @@
+2
+Number Integer Real Fraction Scale Digit Empty Sign
+. e + - 0 1 2 3 4 5 6 7 8 9
+Number
+Number -> Integer | RealInteger -> Digit | Integer Digit
+Real -> Integer Fraction Scale
+Fraction -> . Integer
+Scale -> e Sign Integer | Empty
+Digit -> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+Empty ->
+Sign -> + | -
+
+

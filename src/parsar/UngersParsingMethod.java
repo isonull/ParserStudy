@@ -31,8 +31,8 @@ public class UngersParsingMethod implements ParsingMethod {
 	private Grammar grammar;
 	private RuleList ruleList;
 
-	private int level = -1;
-	private LinkedList<Integer> pending = new LinkedList();;
+	private int level;
+	private LinkedList<Integer> pending;
 
 	public UngersParsingMethod() {
 	}
@@ -206,6 +206,8 @@ public class UngersParsingMethod implements ParsingMethod {
 		parsingProcess = new PhraseList();
 		grammar = grammar_;
 		ruleList = grammar.getRuleListClone();
+		level = -1;
+		pending = new LinkedList<Integer>();
 	}
 
 	private void ConstructParsingProcess() throws GrammarException {
@@ -223,15 +225,21 @@ public class UngersParsingMethod implements ParsingMethod {
 	}
 
 	@Override
-	public LinkedList<Phrase> parse(Phrase phrase, Grammar grammar) throws GrammarException {
+	public PhraseList parse(Phrase phrase, Grammar grammar) throws GrammarException {
 		initialise(grammar);
 		boolean isMatch = parse_AUX(phrase, grammar.getPhrase(grammar.getStartSymbol()));
-
 		System.out.println("matched? " + isMatch);
 		appliedRules.println();
-
 		ConstructParsingProcess();
 		parsingProcess.println();
 		return parsingProcess;
+	}
+
+	public PhraseList getParsingProcess() {
+		return parsingProcess;
+	}
+
+	public RuleList getAppliedRules() {
+		return appliedRules;
 	}
 }

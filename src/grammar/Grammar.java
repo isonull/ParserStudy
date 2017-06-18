@@ -6,6 +6,8 @@ public class Grammar {
 	// TODO All get methods should return a copy.
 	// TODO other states to describe behaviours of the Grammar
 	private final byte languageType;
+	// private final boolean containEmptyRule;
+
 	private final SymbolList nonTerminalSymbolList;
 	private final SymbolList terminalSymbolList;
 	private final Symbol startSymbol;
