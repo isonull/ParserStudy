@@ -5,31 +5,55 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GrammarFactory {
 
 	// TODO The validity check should be done.
 	// TODO Singleton pattern for symbol to avoid name duplication.
 
-	protected SymbolList getTerminalSymbolList(String str) throws GrammarException {
-		String[] strSplit = str.split(" ");
+	private static final Pattern ruleLinePattern = Pattern.compile("\\(\\d+,(LEFT|RIGHT|NO)\\)");
+
+	private static final String splitStr = "\\p{Space}\\|\\p{Space}";
+
+	protected static SymbolList getTerminalSymbolList(String str) throws GrammarException {
+		String[] strPart = str.split(splitStr);
+		String[] strSplit = strPart[0].split(" ");
 		SymbolList symbolList = new SymbolList();
 		for (String s : strSplit) {
-			symbolList.add(new Symbol(s, true));
+			if (s.compareTo("") != 0) {
+				symbolList.add(new Symbol(s, true, false));
+			}
+		}
+		strSplit = strPart[1].split(" ");
+		for (String s : strSplit) {
+			if (s.compareTo("") != 0) {
+				symbolList.add(new Symbol(s, true, true));
+			}
 		}
 		return symbolList;
 	}
 
-	protected SymbolList getNonTerminalSymbolList(String str) throws GrammarException {
-		String[] strSplit = str.split(" ");
+	protected static SymbolList getNonTerminalSymbolList(String str) throws GrammarException {
+		String[] strPart = str.split(splitStr);
+		String[] strSplit = strPart[0].split(" ");
 		SymbolList symbolList = new SymbolList();
 		for (String s : strSplit) {
-			symbolList.add(new Symbol(s, false));
+			if (s.compareTo("") != 0) {
+				symbolList.add(new Symbol(s, false, false));
+			}
+		}
+		strSplit = strPart[1].split(" ");
+		for (String s : strSplit) {
+			if (s.compareTo("") != 0) {
+				symbolList.add(new Symbol(s, false, true));
+			}
 		}
 		return symbolList;
 	}
 
-	protected Phrase getPhrase(String inputStr, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)
+	protected static Phrase getPhrase(String inputStr, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)
 			throws GrammarException {
 		// The method does not check the consistency of the input reference
 		// SymbolList e.g duplication of name. Also the reference of symbol is
@@ -38,8 +62,8 @@ public class GrammarFactory {
 		return new Phrase(getSymbolList(inputStr, nonTermialSymbolList, terminalSymbolList));
 	}
 
-	protected SymbolList getSymbolList(String inputStr, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)
-			throws GrammarException {
+	protected static SymbolList getSymbolList(String inputStr, SymbolList nonTermialSymbolList,
+			SymbolList terminalSymbolList) throws GrammarException {
 		// The method does not check the consistency of the input reference
 		// SymbolList e.g duplication of name. Also the reference of symbol is
 		// taken from the list.
@@ -59,7 +83,7 @@ public class GrammarFactory {
 		return phrase;
 	}
 
-	protected PhraseList getRuleOuts(String inputStr, String splitStr, SymbolList nonTermialSymbolList,
+	protected static PhraseList getRuleOuts(String inputStr, String splitStr, SymbolList nonTermialSymbolList,
 			SymbolList terminalSymbolList) throws GrammarException {
 		String ss = " " + splitStr + " ";
 		String[] strSplit = inputStr.split(ss);
@@ -70,35 +94,89 @@ public class GrammarFactory {
 		return phraseList;
 	}
 
-	protected Rule getRule(String inputStr, SymbolList nonTermialSymbolList, SymbolList terminalSymbolList)
-			throws GrammarException {
-		// Now this method just support a one to one rule e.g. "a -> b"
-		String[] strSplit = inputStr.split(" -> ");
-		if (strSplit.length != 2) {
-			throw new GrammarException("The rule must contain one and only one arrow");
-		}
-
-		Phrase in = getPhrase(strSplit[0], nonTermialSymbolList, terminalSymbolList);
-		Phrase out = getPhrase(strSplit[1], nonTermialSymbolList, terminalSymbolList);
-		return new Rule(in, out);
-	}
-
-	protected RuleList getCasesRule(String inputStr, String splitStr, SymbolList nonTermialSymbolList,
+	protected static RuleList getRuleLine(String str, String splitStr, SymbolList nonTermnialSymbolList,
 			SymbolList terminalSymbolList) throws GrammarException {
-		String[] strSplit = inputStr.split(" -> ");
-		if (strSplit.length != 2) {
-			throw new GrammarException("The rule must contain one and only one arrow");
-		}
 		RuleList ruleList = new RuleList();
-		Phrase in = getPhrase(strSplit[0], nonTermialSymbolList, terminalSymbolList);
-		PhraseList outs = getRuleOuts(strSplit[1], splitStr, nonTermialSymbolList, terminalSymbolList);
-		for (Phrase out : outs) {
-			ruleList.add(new Rule(in, out));
+		int precedence;
+		int association;
+		Matcher matcher = ruleLinePattern.matcher(str);
+		if (!matcher.find()) {
+			throw new GrammarException("A rule line should begin with " + ruleLinePattern.toString());
 		}
+
+		String head = str.substring(matcher.start() + 1, matcher.end() - 1);
+		String[] headSplit = head.split(",");
+		precedence = Integer.parseInt(headSplit[0]);
+		switch (headSplit[1]) {
+		case "RIGHT": {
+			association = Rule.RIGHT_ASSICIATION;
+			break;
+		}
+		case "LEFT": {
+			association = Rule.LEFT_ASSOCIATION;
+			break;
+		}
+		case "NO": {
+			association = Rule.NO_ASSOCIATION;
+			break;
+		}
+		default: {
+			throw new GrammarException("The headSplit[1] for a ruleLine should be LEFT | RIGHT | NO");
+		}
+		}
+
+		String ruleStr = str.substring(matcher.end() + 1);
+		String[] ruleStrSplit = ruleStr.split(" -> ");
+		String[] outsStr = ruleStrSplit[1].split(splitStr);
+		Phrase in = getPhrase(ruleStrSplit[0], nonTermnialSymbolList, terminalSymbolList);
+		PhraseList outs = new PhraseList();
+		for (String outStr : outsStr) {
+			outs.add(getPhrase(outStr, nonTermnialSymbolList, terminalSymbolList));
+		}
+		for (Phrase out : outs) {
+			ruleList.add(new Rule(in, out, precedence, association));
+		}
+
 		return ruleList;
 	}
 
-	protected boolean getIsMonotonic(RuleList ruleList, Symbol emptySymbol) {
+	// protected static Rule getRule(String inputStr, SymbolList
+	// nonTermialSymbolList, SymbolList terminalSymbolList)
+	// throws GrammarException {
+	// // Now this method just support a one to one rule e.g. "a -> b"
+	// String[] strSplit = inputStr.split(" -> ");
+	// if (strSplit.length != 2) {
+	// throw new GrammarException("The rule must contain one and only one
+	// arrow");
+	// }
+	//
+	// Phrase in = getPhrase(strSplit[0], nonTermialSymbolList,
+	// terminalSymbolList);
+	// Phrase out = getPhrase(strSplit[1], nonTermialSymbolList,
+	// terminalSymbolList);
+	// return new Rule(in, out);
+	// }
+
+	// protected static RuleList getCasesRule(String inputStr, String splitStr,
+	// SymbolList nonTermialSymbolList,
+	// SymbolList terminalSymbolList) throws GrammarException {
+	// String[] strSplit = inputStr.split(" -> ");
+	// if (strSplit.length != 2) {
+	// throw new GrammarException("The rule must contain one and only one arrow
+	// (->)");
+	// }
+	// RuleList ruleList = new RuleList();
+	// Phrase in = getPhrase(strSplit[0], nonTermialSymbolList,
+	// terminalSymbolList);
+	// PhraseList outs = getRuleOuts(strSplit[1], splitStr,
+	// nonTermialSymbolList, terminalSymbolList);
+	// for (Phrase out : outs) {
+	// ruleList.add(new Rule(in, out));
+	// }
+	// return ruleList;
+	// }
+
+	protected static boolean getIsMonotonic(RuleList ruleList, Symbol emptySymbol) {
 		for (Rule rule : ruleList) {
 			if (rule.getIn().length() > rule.getOut().length() - rule.getOut().containNumberOfSymbol(emptySymbol)) {
 				return false;
@@ -107,7 +185,7 @@ public class GrammarFactory {
 		return true;
 	}
 
-	protected boolean getContainEmptyRule(RuleList ruleList, Symbol emptySymbol) {
+	protected static boolean getContainEmptyRule(RuleList ruleList, Symbol emptySymbol) {
 		// TODO this check is rough
 		SymbolList symbolList = new SymbolList();
 		symbolList.add(emptySymbol);
@@ -120,28 +198,31 @@ public class GrammarFactory {
 		return false;
 	}
 
-	public Grammar getGrammar(String path) throws GrammarException, IOException {
+	public static Grammar getGrammar(String path) throws GrammarException, IOException {
 		// TODO check name duplication
 
 		ArrayList<String> strList = getGrammarStringList(getGrammarFile(path));
 		byte languageType = (byte) Integer.parseInt(strList.get(0));
-		String splitStr = strList.get(2);
+		String splitStr2 = strList.get(2);
 		SymbolList nonTerminalSymbolList = getNonTerminalSymbolList(strList.get(3));
 		SymbolList terminalSymbolList = getTerminalSymbolList(strList.get(4));
 		Symbol emptySymbol = terminalSymbolList.getSymbolByName(strList.get(1));
+		if (emptySymbol == null) {
+			throw new GrammarException("The empty symnal should be in the terninal symbol list");
+		}
 		Symbol startSymbol = nonTerminalSymbolList.getSymbolByName(strList.get(5));
 		RuleList ruleList = new RuleList();
 		if (startSymbol == null) {
 			startSymbol = terminalSymbolList.getSymbolByName(strList.get(5));
 		}
 		for (int i = 6; i < strList.size(); ++i) {
-			ruleList.addAll(getCasesRule(strList.get(i), splitStr, nonTerminalSymbolList, terminalSymbolList));
+			ruleList.addAll(getRuleLine(strList.get(i), splitStr, nonTerminalSymbolList, terminalSymbolList));
 		}
 		return new Grammar(languageType, nonTerminalSymbolList, terminalSymbolList, startSymbol, emptySymbol, ruleList,
-				getIsMonotonic(ruleList, emptySymbol), getContainEmptyRule(ruleList, emptySymbol), this);
+				getIsMonotonic(ruleList, emptySymbol), getContainEmptyRule(ruleList, emptySymbol), null);
 	}
 
-	protected File getGrammarFile(String path) throws IOException {
+	protected static File getGrammarFile(String path) throws IOException {
 		// TODO format check
 		File file = new File(path);
 		if (!file.exists()) {
@@ -154,7 +235,7 @@ public class GrammarFactory {
 		return file;
 	}
 
-	protected ArrayList<String> getGrammarStringList(File file) throws IOException {
+	protected static ArrayList<String> getGrammarStringList(File file) throws IOException {
 		BufferedReader fileBufferedReader = new BufferedReader(new FileReader(file));
 		ArrayList<String> strList = new ArrayList<String>();
 		String str;

@@ -112,9 +112,9 @@ public class SymbolList extends LinkedList<Symbol> {
 	public String toString() {
 		String str = "";
 		for (int i = 0; i < this.size() - 1; ++i) {
-			str += this.get(i).getName() + " ";
+			str += this.get(i).toString() + " ";
 		}
-		str += this.get(this.size() - 1).getName();
+		str += this.get(this.size() - 1).toString();
 		return str;
 	}
 

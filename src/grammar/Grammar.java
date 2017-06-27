@@ -5,6 +5,8 @@ public class Grammar {
 	// TODO Only Grammar and Phrase should be exposed.
 	// TODO All get methods should return a copy.
 	// TODO other states to describe behaviours of the Grammar
+	// TODO consider precedence and associativity;
+	// TODO left-recursion elimination and e-rule elimination
 	private final byte languageType;
 	// private final boolean containEmptyRule;
 	private final boolean containEmptyRule;
@@ -15,7 +17,6 @@ public class Grammar {
 	private final Symbol startSymbol;
 	private final Symbol emptySymbol;
 	private final RuleList ruleList;
-	private final GrammarFactory factory;
 
 	protected Grammar(byte languageType_, SymbolList nonTerminalSymbolList_, SymbolList terminalSymbolList_,
 			Symbol startSymbol_, Symbol emptySymbol_, RuleList ruleList_, boolean isMonotonic_,
@@ -28,7 +29,6 @@ public class Grammar {
 		ruleList = ruleList_;
 		isMonotonic = isMonotonic_;
 		containEmptyRule = containEmptyRule_;
-		factory = factory_;
 	}
 
 	public boolean containEmptyRule() {
@@ -44,7 +44,8 @@ public class Grammar {
 	}
 
 	public Phrase getPhrase(String str) throws GrammarException {
-		return factory.getPhrase(str, nonTerminalSymbolList, terminalSymbolList);
+		// TODO this is actually a lexer, implement a symbolTable more detailed.
+		return GrammarFactory.getPhrase(str, nonTerminalSymbolList, terminalSymbolList);
 	}
 
 	public Phrase getPhrase(Symbol symbol) throws GrammarException {
@@ -62,7 +63,7 @@ public class Grammar {
 	}
 
 	public SymbolList getSymbolList(String str) throws GrammarException {
-		return factory.getSymbolList(str, nonTerminalSymbolList, terminalSymbolList);
+		return GrammarFactory.getSymbolList(str, nonTerminalSymbolList, terminalSymbolList);
 	}
 
 	public boolean containSymbol(Symbol symbol) {
@@ -73,16 +74,27 @@ public class Grammar {
 		return languageType;
 	}
 
-	public SymbolList getNonTerminalSymbolList() {
-		return nonTerminalSymbolList;
+	public SymbolList getNonTerminalSymbolListClone() {
+		return (SymbolList) nonTerminalSymbolList.clone();
 	}
 
-	public SymbolList getTerminalSymbolList() {
-		return terminalSymbolList;
+	public SymbolList getTerminalSymbolListClone() {
+		return (SymbolList) terminalSymbolList.clone();
 	}
 
 	public Symbol getStartSymbol() {
 		return startSymbol;
+	}
+
+	public Symbol getSymbolByName(String name) {
+
+		// TODO: consider two symbol with difference reference but the same
+		// name.
+		Symbol symbol;
+		if ((symbol = terminalSymbolList.getSymbolByName(name)) == null) {
+			symbol = nonTerminalSymbolList.getSymbolByName(name);
+		}
+		return symbol;
 	}
 
 	public RuleList getRuleListClone() {
@@ -91,6 +103,10 @@ public class Grammar {
 
 	public void print() {
 		System.out.print(this.toString());
+	}
+
+	public void println() {
+		System.out.println(this.toString());
 	}
 
 	@Override

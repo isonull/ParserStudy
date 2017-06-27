@@ -1,0 +1,9 @@
+2
+ε
+\|
+ | E
++ * ( ) ε | INT
+E
+(1,LEFT) E -> E + E
+(2,RIGHT) E -> E * E
+(3,NO) E -> ( E ) | INT

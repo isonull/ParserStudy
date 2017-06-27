@@ -1,0 +1,7 @@
+2
+ε
+\|
+ | E
++ - * cos ! ( ) ε | INT FLOAT 
+E
+E -> E + E | E - E | E * E | ( E ) | E ! | cos E | FLOAT | INT

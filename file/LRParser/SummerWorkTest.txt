@@ -1,0 +1,9 @@
+2
+ε
+\|
+ | E T F
++ - * cos ! ( ) ε | INT FLOAT
+E
+E -> E + T | E - T | T | + E | - E
+T -> T * F | F
+F -> ( E ) | E ! | cos E | FLOAT | INT

@@ -8,10 +8,17 @@ public class RuleList extends LinkedList<Rule> {
 		super();
 	}
 
+	public boolean add(Rule rule) {
+		if (!this.contains(rule)) {
+			super.add(rule);
+		}
+		return true;
+	}
+
 	public PhraseList getAllOutByIn(Phrase in) {
 		PhraseList outList = new PhraseList();
 		for (Rule rule : this) {
-			if (rule.inEqual(in)) {
+			if (rule.getIn().equals(in)) {
 				outList.add(rule.getOut());
 			}
 		}
@@ -21,7 +28,7 @@ public class RuleList extends LinkedList<Rule> {
 	public RuleList getAllRuleByIn(Phrase in) {
 		RuleList ruleList = new RuleList();
 		for (Rule rule : this) {
-			if (rule.inEqual(in)) {
+			if (rule.getIn().equals(in)) {
 				ruleList.add(rule);
 			}
 		}
