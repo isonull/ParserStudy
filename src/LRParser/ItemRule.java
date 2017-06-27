@@ -19,8 +19,18 @@ public class ItemRule extends Rule {
 		progress = 0;
 	}
 
-	public void nextProgress() {
-		++progress;
+	protected ItemRule(Rule rule_, int progress_) throws GrammarException {
+		super(rule_.getIn(), rule_.getOut(), rule_.getPrecedence(), rule_.getAssociation());
+		rule = rule_;
+		progress = progress_;
+	}
+
+	public ItemRule getNextProgress() throws GrammarException {
+		if (progress < rule.outLength()) {
+			ItemRule itemRule = new ItemRule(rule, progress + 1);
+			return itemRule;
+		}
+		return null;
 	}
 
 	public Symbol progressSymbol() {
@@ -88,6 +98,6 @@ public class ItemRule extends Rule {
 			}
 			str += " " + rule.getOut().getSymbol(i);
 		}
-		return str;
+		return str + (progress == rule.outLength() ? "·" : "");
 	}
 }

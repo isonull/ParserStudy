@@ -27,4 +27,13 @@ public class ListMethod<T> {
 		}
 		return listList;
 	}
+
+	public T findEqualElement(List<T> list, T o) {
+		for (T t : list) {
+			if (t.equals(o)) {
+				return t;
+			}
+		}
+		return null;
+	}
 }

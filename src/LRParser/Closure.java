@@ -2,18 +2,26 @@ package LRParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import grammar.Grammar;
 import grammar.GrammarException;
 import grammar.Rule;
 import grammar.RuleList;
 import grammar.Symbol;
+import list.ListMethod;
 
 public class Closure extends RuleList {
 
-	private Map<Symbol, Closure> nextClosure = new HashMap<>();
+	// The closure in the parsing table should be singleton for each equality
+	// closure. Such limitation is left for the class Parsing Table.
+
+	private Map<Symbol, Closure> nextClosureMap = new HashMap<>();
+	private boolean nextClosureMapGenerated = false;
 
 	public Closure() {
 		super();
@@ -39,16 +47,20 @@ public class Closure extends RuleList {
 		return true;
 	}
 
-	public Closure getClosure(Grammar grammar) throws GrammarException {
+	public ItemRule get(int index) {
+		return (ItemRule) super.get(index);
+	}
+
+	public void getClosure(Grammar grammar) throws GrammarException {
 		RuleList ruleList = grammar.getRuleListClone();
 		boolean moreRule;
-		Closure closure = (Closure) this.clone();
+		// Closure this_ = (Closure) this.clone();
 		ArrayList<Symbol> ins;
 		Symbol s;
 		do {
 			moreRule = false;
 			ins = new ArrayList<>();
-			for (Rule r : closure) {
+			for (Rule r : this) {
 				s = ((ItemRule) r).progressSymbol();
 				if (s != null) {
 					ins.add(s);
@@ -57,15 +69,13 @@ public class Closure extends RuleList {
 			for (Symbol in : ins) {
 				for (Rule r : ruleList.getAllRuleByIn(grammar.getPhrase(in))) {
 					ItemRule newItemRule = new ItemRule(r);
-					if (!closure.contains(newItemRule)) {
-						closure.add(newItemRule);
+					if (!this.contains(newItemRule)) {
+						this.add(newItemRule);
 						moreRule = true;
 					}
 				}
 			}
 		} while (moreRule);
-
-		return closure;
 	}
 
 	public static Closure getStartClosure(Grammar grammar) throws GrammarException {
@@ -77,8 +87,75 @@ public class Closure extends RuleList {
 				closure.add(new ItemRule(rule));
 			}
 		}
-		return closure.getClosure(grammar);
+		closure.getClosure(grammar);
+		return closure;
+	}
 
+	public void generateNextClosureMap(Grammar grammar) throws GrammarException {
+		LinkedList<Closure> closureList = new LinkedList<>();
+		LinkedList<Symbol> nextSymbols = new LinkedList<>();
+		for (Rule rule : this) {
+			Symbol s;
+			ItemRule rule_ = (ItemRule) rule;
+			if ((s = rule_.progressSymbol()) != null) {
+				nextSymbols.add(s);
+			}
+		}
+
+		for (Symbol nextSymbol : nextSymbols) {
+			Closure closure = new Closure();
+			for (Rule rule : this) {
+				ItemRule rule_ = (ItemRule) rule;
+				ItemRule temp;
+				if (nextSymbol.equals(rule_.progressSymbol())) {
+					if ((temp = rule_.getNextProgress()) != null)
+						closure.add(temp);
+				}
+			}
+			closure.getClosure(grammar);
+			nextClosureMap.put(nextSymbol, closure);
+		}
+
+		nextClosureMapGenerated = true;
+	}
+
+	public Closure getNextClosure(Symbol symbol) {
+		return nextClosureMap.get(symbol);
+	}
+
+	public static List<Closure> getClosureSet(Grammar grammar) throws GrammarException {
+		List<Closure> existedClosures = new LinkedList<>();
+		Closure startClosure = getStartClosure(grammar);
+		existedClosures.add(startClosure);
+		boolean moreClosure;
+
+		ListMethod<Closure> listMethod = new ListMethod<>();
+
+		do {
+			moreClosure = false;
+
+			for (int i = 0; i < existedClosures.size(); ++i) {
+				Closure existedClosure = existedClosures.get(i);
+				if (existedClosure.nextClosureMapGenerated) {
+					continue;
+				}
+				existedClosure.generateNextClosureMap(grammar);
+				Set<Entry<Symbol, Closure>> entrySet = existedClosure.nextClosureMap.entrySet();
+				for (Entry<Symbol, Closure> entry : entrySet) {
+					Symbol key = entry.getKey();
+					Closure value = entry.getValue();
+					if (existedClosures.contains(value)) {
+						existedClosure.nextClosureMap.replace(key, listMethod.findEqualElement(existedClosures, value));
+					} else {
+						existedClosures.add(value);
+					}
+				}
+				moreClosure = true;
+			}
+
+		} while (moreClosure);
+
+		return existedClosures;
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package LRParser;
 
+import java.util.List;
+
 import grammar.Grammar;
 import grammar.GrammarFactory;
 import test.Test;
@@ -21,9 +23,33 @@ public class _closureTest extends Test {
 		closure.println();
 
 		printLine();
-
 		closure = Closure.getStartClosure(grammar);
 		closure.println();
 
+		printLine();
+		closure.generateNextClosureMap(grammar);
+		closure.println();
+		printLine();
+		closure.getNextClosure(grammar.getSymbolByName("INT")).println();
+		printLine();
+		closure.getNextClosure(grammar.getSymbolByName("E")).println();
+		printLine();
+		closure.getNextClosure(grammar.getSymbolByName("(")).println();
+
+		println(closure.getNextClosure(grammar.getSymbolByName("E"))
+				.equals(closure.getNextClosure(grammar.getSymbolByName("E")).clone()));
+
+		println(closure.getNextClosure(grammar.getSymbolByName("(")).contains(closure.get(3).getNextProgress()));
+
+		// closure.getNextClosure(grammar.getSymbolByName("(")).get(4).getNextProgress().getNextProgress().print();
+
+		List<Closure> closureList = Closure.getClosureSet(grammar);
+		int i = 0;
+		for (Closure c : closureList) {
+			printLine();
+			System.out.println(i++);
+			c.println();
+
+		}
 	}
 }
