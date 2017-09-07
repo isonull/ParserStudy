@@ -1,12 +1,12 @@
 2
 ε
 \|
-Expr Term Factor
-( ) * + i ε
+ | Expr Term Factor
+( ) * + ε | i
 Expr
-Expr -> Expr + Term
-Expr -> Term
-Term -> Term * Factor
-Term -> Factor
-Factor -> ( Expr )
-Factor -> i
+(0,NO) Expr -> Expr + Term
+(0,NO) Expr -> Term
+(0,NO) Term -> Term * Factor
+(0,NO) Term -> Factor
+(0,NO) Factor -> ( Expr )
+(0,NO) Factor -> i

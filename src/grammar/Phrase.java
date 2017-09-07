@@ -57,6 +57,14 @@ public class Phrase {
 		return symbolList.contains(symbol);
 	}
 
+	public boolean onlyContainSymbol(Symbol symbol) {
+		return symbolList.onlyContain(symbol);
+	}
+
+	public boolean onlyContainSymbol(SymbolList symbols) {
+		return symbolList.onlyContain(symbols);
+	}
+
 	public int containNumberOfSymbol(Symbol symbol) {
 		return symbolList.containNumberOfSymbol(symbol);
 	}

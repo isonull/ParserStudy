@@ -1,12 +1,14 @@
 package grammar;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
-public class SymbolList extends LinkedList<Symbol> {
+public class SymbolList extends ArrayList<Symbol> {
 
 	// Decorate new functions for the ArrayList<Symbol>
+	// null is treated as the phrase end marker
 
 	protected SymbolList() {
 		super();
@@ -14,6 +16,26 @@ public class SymbolList extends LinkedList<Symbol> {
 
 	protected SymbolList(List<Symbol> symbols) {
 		super(symbols);
+	}
+
+	public boolean addUnique(Symbol symbol) {
+		if (!this.contains(symbol)) {
+			add(symbol);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean addAllUnique(Collection<Symbol> symbols) {
+		boolean added = false;
+		if (symbols != null) {
+			for (Symbol symbol : symbols) {
+				if (this.addUnique(symbol)) {
+					added = true;
+				}
+			}
+		}
+		return added;
 	}
 
 	public boolean containSymbolName(String name) {
@@ -108,11 +130,19 @@ public class SymbolList extends LinkedList<Symbol> {
 		System.out.print(this.toString());
 	}
 
+	public void println() {
+		System.out.println(this.toString());
+	}
+
 	@Override
 	public String toString() {
 		String str = "";
 		for (int i = 0; i < this.size() - 1; ++i) {
-			str += this.get(i).toString() + " ";
+			if (this.get(i) == null) {
+				str += "null ";
+			} else {
+				str += this.get(i).toString() + " ";
+			}
 		}
 		str += this.get(this.size() - 1).toString();
 		return str;
@@ -138,5 +168,27 @@ public class SymbolList extends LinkedList<Symbol> {
 		for (int i = 0; i < limit - base; ++i) {
 			this.remove(base);
 		}
+	}
+
+	public boolean onlyContain(Symbol symbol) {
+		// symbol in the list and only symbol in the list
+		boolean atLeastOne = false;
+		for (Symbol s : this) {
+			if (!s.equals(symbol)) {
+				return false;
+			} else {
+				atLeastOne = true;
+			}
+		}
+		return atLeastOne;
+	}
+
+	public boolean onlyContain(SymbolList symbols) {
+		for (Symbol symbol : this) {
+			if (!symbols.contains(symbol)) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

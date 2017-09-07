@@ -47,11 +47,43 @@ public class Closure extends RuleList {
 		return true;
 	}
 
+	public Closure getNextClosure(Symbol symbol) throws Exception {
+		if (!nextClosureMapGenerated) {
+			throw new Exception("The next closure map has not generated yet.");
+		}
+		return nextClosureMap.get(symbol);
+	}
+
 	public ItemRule get(int index) {
 		return (ItemRule) super.get(index);
 	}
 
-	public void getClosure(Grammar grammar) throws GrammarException {
+	public List<ItemRule> getByNextSymbol(Symbol symbol) {
+		List<ItemRule> itemRules = new ArrayList<>();
+		for (Rule itemRule : this) {
+			ItemRule itemRule_ = (ItemRule) itemRule;
+			if (!itemRule_.isDone()) {
+				if (itemRule_.getOut().getSymbol(itemRule_.getProgress()).equals(symbol)) {
+					itemRules.add(itemRule_);
+				}
+			}
+		}
+		return itemRules;
+	}
+
+	public List<ItemRule> getDoneItemRules() {
+		List<ItemRule> ruleList = new LinkedList<>();
+		ItemRule rule_;
+		for (Rule rule : this) {
+			rule_ = (ItemRule) rule;
+			if (rule_.isDone()) {
+				ruleList.add(rule_);
+			}
+		}
+		return ruleList;
+	}
+
+	private void getClosure(Grammar grammar) throws GrammarException {
 		RuleList ruleList = grammar.getRuleListClone();
 		boolean moreRule;
 		// Closure this_ = (Closure) this.clone();
@@ -92,6 +124,9 @@ public class Closure extends RuleList {
 	}
 
 	public void generateNextClosureMap(Grammar grammar) throws GrammarException {
+		if (nextClosureMapGenerated) {
+			return;
+		}
 		LinkedList<Closure> closureList = new LinkedList<>();
 		LinkedList<Symbol> nextSymbols = new LinkedList<>();
 		for (Rule rule : this) {
@@ -119,10 +154,6 @@ public class Closure extends RuleList {
 		nextClosureMapGenerated = true;
 	}
 
-	public Closure getNextClosure(Symbol symbol) {
-		return nextClosureMap.get(symbol);
-	}
-
 	public static List<Closure> getClosureSet(Grammar grammar) throws GrammarException {
 		List<Closure> existedClosures = new LinkedList<>();
 		Closure startClosure = getStartClosure(grammar);
@@ -145,6 +176,7 @@ public class Closure extends RuleList {
 					Symbol key = entry.getKey();
 					Closure value = entry.getValue();
 					if (existedClosures.contains(value)) {
+						// eliminate the duplication
 						existedClosure.nextClosureMap.replace(key, listMethod.findEqualElement(existedClosures, value));
 					} else {
 						existedClosures.add(value);

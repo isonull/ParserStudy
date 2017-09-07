@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,42 +17,79 @@ public class GrammarFactory {
 	// TODO The validity check should be done.
 	// TODO Singleton pattern for symbol to avoid name duplication.
 
-	private static final Pattern ruleLinePattern = Pattern.compile("\\(\\d+,(LEFT|RIGHT|NO)\\)");
+	private static final Pattern ruleLinePattern = Pattern.compile("\\(\\d+,(LEFT|RIGHT|NO),\\w*\\)");
+	private static final Pattern symbolLinePattern = Pattern.compile("\\((Y|N),(Y|N),[^,]*,\\w*\\)");
 
-	private static final String splitStr = "\\p{Space}\\|\\p{Space}";
+	private static String splitStr = "\\p{Space}\\|\\p{Space}";
+	// private static SymbolList tempSymbolList;
 
-	protected static SymbolList getTerminalSymbolList(String str) throws GrammarException {
-		String[] strPart = str.split(splitStr);
-		String[] strSplit = strPart[0].split(" ");
+	// protected static SymbolList getTerminalSymbolList(String str) throws
+	// GrammarException {
+	// String[] strPart = str.split(splitStr);
+	// String[] strSplit = strPart[0].split(" ");
+	// SymbolList symbolList = new SymbolList();
+	// for (String s : strSplit) {
+	// if (s.compareTo("") != 0) {
+	// symbolList.add(new Symbol(s, true, false));
+	// }
+	// }
+	// strSplit = strPart[1].split(" ");
+	// for (String s : strSplit) {
+	// if (s.compareTo("") != 0) {
+	// symbolList.add(new Symbol(s, true, true));
+	// }
+	// }
+	// return symbolList;
+	// }
+
+	// protected static SymbolList getNonTerminalSymbolList(String str) throws
+	// GrammarException {
+	// String[] strPart = str.split(splitStr);
+	// String[] strSplit = strPart[0].split(" ");
+	// SymbolList symbolList = new SymbolList();
+	// for (String s : strSplit) {
+	// if (s.compareTo("") != 0) {
+	// symbolList.add(new Symbol(s, false, false));
+	// }
+	// }
+	// strSplit = strPart[1].split(" ");
+	// for (String s : strSplit) {
+	// if (s.compareTo("") != 0) {
+	// symbolList.add(new Symbol(s, false, true));
+	// }
+	// }
+	// return symbolList;
+	// }
+
+	protected static SymbolList getSymbolLine(String str, Method[] methods) throws GrammarException {
+		Matcher matcher = symbolLinePattern.matcher(str);
+		if (!matcher.find()) {
+			throw new GrammarException("A symbol line should begin with " + symbolLinePattern.toString());
+		}
+
+		String head = str.substring(matcher.start() + 1, matcher.end() - 1);
+		String[] headSplit = head.split(",");
+
+		boolean isTerminal = headSplit[0].equals("Y") ? true : false;
+		boolean hasValue = headSplit[1].equals("Y") ? true : false;
+		Pattern lexPattern = null;
+		Method lexMethod = null;
 		SymbolList symbolList = new SymbolList();
-		for (String s : strSplit) {
-			if (s.compareTo("") != 0) {
-				symbolList.add(new Symbol(s, true, false));
-			}
-		}
-		strSplit = strPart[1].split(" ");
-		for (String s : strSplit) {
-			if (s.compareTo("") != 0) {
-				symbolList.add(new Symbol(s, true, true));
-			}
-		}
-		return symbolList;
-	}
+		String symbolsStr = str.substring(matcher.end() + 1);
+		String[] symbolsName = symbolsStr.split(splitStr);
 
-	protected static SymbolList getNonTerminalSymbolList(String str) throws GrammarException {
-		String[] strPart = str.split(splitStr);
-		String[] strSplit = strPart[0].split(" ");
-		SymbolList symbolList = new SymbolList();
-		for (String s : strSplit) {
-			if (s.compareTo("") != 0) {
-				symbolList.add(new Symbol(s, false, false));
+		if (headSplit.length >= 3) {
+			lexPattern = Pattern.compile(headSplit[2]);
+			for (Method method : methods) {
+				if (method.getName().equals(headSplit[3])) {
+					lexMethod = method;
+					break;
+				}
 			}
 		}
-		strSplit = strPart[1].split(" ");
-		for (String s : strSplit) {
-			if (s.compareTo("") != 0) {
-				symbolList.add(new Symbol(s, false, true));
-			}
+
+		for (String symbolName : symbolsName) {
+			symbolList.add(new Symbol(symbolName, isTerminal, hasValue, lexPattern, lexMethod));
 		}
 		return symbolList;
 	}
@@ -95,10 +136,11 @@ public class GrammarFactory {
 	}
 
 	protected static RuleList getRuleLine(String str, String splitStr, SymbolList nonTermnialSymbolList,
-			SymbolList terminalSymbolList) throws GrammarException {
+			SymbolList terminalSymbolList, Method[] methods) throws GrammarException {
 		RuleList ruleList = new RuleList();
 		int precedence;
 		int association;
+
 		Matcher matcher = ruleLinePattern.matcher(str);
 		if (!matcher.find()) {
 			throw new GrammarException("A rule line should begin with " + ruleLinePattern.toString());
@@ -109,7 +151,7 @@ public class GrammarFactory {
 		precedence = Integer.parseInt(headSplit[0]);
 		switch (headSplit[1]) {
 		case "RIGHT": {
-			association = Rule.RIGHT_ASSICIATION;
+			association = Rule.RIGHT_ASSOCIATION;
 			break;
 		}
 		case "LEFT": {
@@ -133,8 +175,24 @@ public class GrammarFactory {
 		for (String outStr : outsStr) {
 			outs.add(getPhrase(outStr, nonTermnialSymbolList, terminalSymbolList));
 		}
+
+		boolean methodFound = false;
+
+		String methodName = null;
+		Method method = null;
+
+		if (headSplit.length == 3) {
+			methodName = headSplit[2];
+			for (Method m : methods) {
+				if (methodName.equals(m.getName())) {
+					method = m;
+					break;
+				}
+			}
+		}
+
 		for (Phrase out : outs) {
-			ruleList.add(new Rule(in, out, precedence, association));
+			ruleList.add(new Rule(in, out, precedence, association, method));
 		}
 
 		return ruleList;
@@ -198,45 +256,99 @@ public class GrammarFactory {
 		return false;
 	}
 
-	public static Grammar getGrammar(String path) throws GrammarException, IOException {
+	public static Grammar getGrammar(String grammarPath, String jarPath, String tokenClassName, String ruleClassName)
+			throws GrammarException, IOException, ClassNotFoundException {
 		// TODO check name duplication
 
-		ArrayList<String> strList = getGrammarStringList(getGrammarFile(path));
+		ArrayList<String> strList = getGrammarStringList(getGrammarFile(grammarPath));
+		URL[] url = new URL[] { new URL("file:" + jarPath) };
+		URLClassLoader urlClassLoader = new URLClassLoader(url);
+		Method[] ruleMethods = urlClassLoader.loadClass(ruleClassName).getMethods();
+		Method[] tokenMethods = urlClassLoader.loadClass(tokenClassName).getMethods();
 		byte languageType = (byte) Integer.parseInt(strList.get(0));
-		String splitStr2 = strList.get(2);
-		SymbolList nonTerminalSymbolList = getNonTerminalSymbolList(strList.get(3));
-		SymbolList terminalSymbolList = getTerminalSymbolList(strList.get(4));
-		Symbol emptySymbol = terminalSymbolList.getSymbolByName(strList.get(1));
-		if (emptySymbol == null) {
-			throw new GrammarException("The empty symnal should be in the terninal symbol list");
+		String splitStr2 = strList.get(1);
+
+		// SymbolList nonTerminalSymbolList =
+		// getNonTerminalSymbolList(strList.get(3));
+		// SymbolList terminalSymbolList =
+		// getTerminalSymbolList(strList.get(4));
+		// Symbol emptySymbol =
+		// terminalSymbolList.getSymbolByName(strList.get(1));
+		// if (emptySymbol == null) {
+		// throw new GrammarException("The empty symnal should be in the
+		// terninal symbol list");
+		// }
+		// Symbol startSymbol =
+		// nonTerminalSymbolList.getSymbolByName(strList.get(5));
+		// RuleList ruleList = new RuleList();
+		// if (startSymbol == null) {
+		// startSymbol = terminalSymbolList.getSymbolByName(strList.get(5));
+		// }
+		// if (startSymbol == null) {
+		// throw new GrammarException("start Symbol is not correctly fetched");
+		// }
+		// for (int i = 6; i < strList.size(); ++i) {
+		// ruleList.addAll(getRuleLine(strList.get(i), splitStr,
+		// nonTerminalSymbolList, terminalSymbolList, methods));
+		// }
+
+		String symbolLine;
+		int pointer = 4;
+		SymbolList symbolList = new SymbolList();
+		SymbolList nonTerminalSymbolList = new SymbolList();
+		SymbolList terminalSymbolList = new SymbolList();
+		for (; !(symbolLine = strList.get(pointer)).equals("*"); ++pointer) {
+			symbolList.addAll(getSymbolLine(symbolLine, tokenMethods));
 		}
-		Symbol startSymbol = nonTerminalSymbolList.getSymbolByName(strList.get(5));
+		nonTerminalSymbolList = symbolList.getNonTerminalSymbols();
+		terminalSymbolList = symbolList.getTerminalSymbols();
+
+		Symbol startSymbol = symbolList.getSymbolByName(strList.get(3));
+		Symbol emptySymbol = symbolList.getSymbolByName(strList.get(2));
+
 		RuleList ruleList = new RuleList();
-		if (startSymbol == null) {
-			startSymbol = terminalSymbolList.getSymbolByName(strList.get(5));
+
+		++pointer;
+		for (; pointer < strList.size(); ++pointer) {
+			ruleList.addAll(getRuleLine(strList.get(pointer), splitStr, nonTerminalSymbolList, terminalSymbolList,
+					ruleMethods));
 		}
-		for (int i = 6; i < strList.size(); ++i) {
-			ruleList.addAll(getRuleLine(strList.get(i), splitStr, nonTerminalSymbolList, terminalSymbolList));
-		}
-		return new Grammar(languageType, nonTerminalSymbolList, terminalSymbolList, startSymbol, emptySymbol, ruleList,
-				getIsMonotonic(ruleList, emptySymbol), getContainEmptyRule(ruleList, emptySymbol), null);
+		return new Grammar(languageType, nonTerminalSymbolList, terminalSymbolList, symbolList, startSymbol,
+				emptySymbol, ruleList, getIsMonotonic(ruleList, emptySymbol),
+				getContainEmptyRule(ruleList, emptySymbol), null);
 	}
 
-	protected static File getGrammarFile(String path) throws IOException {
+	protected static File getFile(String path) throws IOException {
 		// TODO format check
 		File file = new File(path);
 		if (!file.exists()) {
-			throw new IOException("The file by given path does not exist.");
+			throw new IOException("The file by " + path + " does not exist.");
 		} else if (!file.canRead()) {
-			throw new IOException("The file by given path is not readable.");
+			throw new IOException("The file by " + path + " given path is not readable.");
 		} else if (!file.isFile()) {
-			throw new IOException("The file by given path is not a file but a Directory.");
+			throw new IOException("The file by " + path + " given path is not a file but a Directory.");
 		}
 		return file;
 	}
 
-	protected static ArrayList<String> getGrammarStringList(File file) throws IOException {
-		BufferedReader fileBufferedReader = new BufferedReader(new FileReader(file));
+	protected static File getGrammarFile(String grammarPath) throws IOException {
+		return getFile(grammarPath);
+	}
+
+	protected static URLClassLoader getClassLoader(String jarPath) throws MalformedURLException {
+		URL[] url = new URL[] { new URL("file:" + jarPath) };
+		return new URLClassLoader(url);
+	}
+
+	protected static Method[] getMethods(String jarPath) throws MalformedURLException, ClassNotFoundException {
+		URL[] url = new URL[] { new URL("file:" + jarPath) };
+		URLClassLoader classLoader = new URLClassLoader(url);
+		Class clazz = Class.forName("SummerWork.ReduceRuleMethod", true, classLoader);
+		return clazz.getMethods();
+	}
+
+	protected static ArrayList<String> getGrammarStringList(File grammarFile) throws IOException {
+		BufferedReader fileBufferedReader = new BufferedReader(new FileReader(grammarFile));
 		ArrayList<String> strList = new ArrayList<String>();
 		String str;
 		while ((str = fileBufferedReader.readLine()) != null) {

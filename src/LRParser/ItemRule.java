@@ -11,16 +11,16 @@ import grammar.Symbol;
 public class ItemRule extends Rule {
 	// e.g. progress 1 means A -> B·CD
 	Rule rule;
-	private int progress;
+	private final int progress;
 
 	protected ItemRule(Rule rule_) throws GrammarException {
-		super(rule_.getIn(), rule_.getOut(), rule_.getPrecedence(), rule_.getAssociation());
+		super(rule_.getIn(), rule_.getOut(), rule_.getPrecedence(), rule_.getAssociation(), rule_.getMethod());
 		rule = rule_;
 		progress = 0;
 	}
 
 	protected ItemRule(Rule rule_, int progress_) throws GrammarException {
-		super(rule_.getIn(), rule_.getOut(), rule_.getPrecedence(), rule_.getAssociation());
+		super(rule_.getIn(), rule_.getOut(), rule_.getPrecedence(), rule_.getAssociation(), rule_.getMethod());
 		rule = rule_;
 		progress = progress_;
 	}
@@ -49,6 +49,10 @@ public class ItemRule extends Rule {
 		return progress;
 	}
 
+	public Rule getRule() {
+		return rule;
+	}
+
 	public Closure getClosure(Grammar grammar) throws GrammarException {
 		RuleList ruleList = grammar.getRuleListClone();
 		boolean moreRule;
@@ -73,7 +77,6 @@ public class ItemRule extends Rule {
 						moreRule = true;
 					}
 				}
-
 			}
 		} while (moreRule);
 

@@ -1,0 +1,24 @@
+2
+\|
+ε
+E
+(N,Y,,) E
+(Y,N,\+,c) +
+(Y,N,-,c) -
+(Y,N,\*,c) *
+(Y,N,cos,c) cos
+(Y,N,!,c) !
+(Y,N,\(,c) (
+(Y,N,\),c) )
+(Y,N,ε,c) ε
+(Y,Y,\d+,i) INT
+(Y,Y,\d+.\d+,d) FLOAT
+*
+(1,LEFT,add) E -> E + E
+(1,LEFT,min) E -> E - E
+(2,RIGHT,prod) E -> E * E
+(3,NO,cos) E -> cos E
+(4,NO,fact) E -> E !
+(5,NO,neg) E -> - E
+(0,NO,conzt) E -> ( E )
+(0,NO,conzt) E -> FLOAT | INT

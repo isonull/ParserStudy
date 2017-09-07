@@ -4,4 +4,10 @@
  | E
 + - * cos ! ( ) ε | INT FLOAT 
 E
-E -> E + E | E - E | E * E | ( E ) | E ! | cos E | FLOAT | INT
+(1,LEFT,add) E -> E + E
+(1,LEFT,min) E -> E - E
+(2,RIGHT,prod) E -> E * E
+(3,NO,cos) E -> cos E
+(4,NO,fact) E -> E !
+(0,NO,conzt) E -> ( E ) 
+(0,NO,conzt) E -> FLOAT | INT

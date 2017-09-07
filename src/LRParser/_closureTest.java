@@ -49,7 +49,23 @@ public class _closureTest extends Test {
 			printLine();
 			System.out.println(i++);
 			c.println();
+		}
 
+		printLine();
+		grammar = grammarFactory
+				.getGrammar("/Users/zijunyan/Desktop/JAVAWORKDIR/ParserStudy/file/LRParser/SummerWorkTest2.txt");
+		grammar.println();
+		closureList = Closure.getClosureSet(grammar);
+		i = 0;
+		for (Closure c : closureList) {
+			printLine();
+			System.out.println(i++);
+			c.println();
+		}
+
+		printLine();
+		for (ItemRule itemRules : closureList.get(13).getByNextSymbol(grammar.getSymbolByName("+"))) {
+			itemRules.println();
 		}
 	}
 }

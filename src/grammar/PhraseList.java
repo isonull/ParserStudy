@@ -3,6 +3,9 @@ package grammar;
 import java.util.LinkedList;
 
 public class PhraseList extends LinkedList<Phrase> {
+
+	// TODO restructure to decorator pattern;
+
 	public void sortByLength() {
 		this.sort(new PhraseComparatorByLength());
 	}
