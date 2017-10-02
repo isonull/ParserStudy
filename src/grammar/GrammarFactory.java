@@ -266,7 +266,7 @@ public class GrammarFactory {
 		Method[] ruleMethods = urlClassLoader.loadClass(ruleClassName).getMethods();
 		Method[] tokenMethods = urlClassLoader.loadClass(tokenClassName).getMethods();
 		byte languageType = (byte) Integer.parseInt(strList.get(0));
-		String splitStr2 = strList.get(1);
+		// String splitStr2 = strList.get(1);
 
 		// SymbolList nonTerminalSymbolList =
 		// getNonTerminalSymbolList(strList.get(3));
@@ -313,6 +313,9 @@ public class GrammarFactory {
 			ruleList.addAll(getRuleLine(strList.get(pointer), splitStr, nonTerminalSymbolList, terminalSymbolList,
 					ruleMethods));
 		}
+
+		urlClassLoader.close();
+
 		return new Grammar(languageType, nonTerminalSymbolList, terminalSymbolList, symbolList, startSymbol,
 				emptySymbol, ruleList, getIsMonotonic(ruleList, emptySymbol),
 				getContainEmptyRule(ruleList, emptySymbol), null);
